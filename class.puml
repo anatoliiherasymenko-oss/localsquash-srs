@@ -1,0 +1,77 @@
+@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+abstract class MediaFile {
+  # name : String
+  # sizeBytes : long
+  # mimeType : String
+  + validate() : ValidationResult
+  + getExtension() : String
+}
+
+class VideoFile {
+  - durationSec : float
+  - width : int
+  - height : int
+  + getResolution() : String
+}
+
+class ImageFile {
+  - width : int
+  - height : int
+  + hasExif() : boolean
+}
+
+class AudioFile {
+  - durationSec : float
+  - sourceCodec : String
+}
+
+class CompressionSettings {
+  - crf : int = 26
+  - preset : String = "medium"
+  - scale : float = 1.0
+  - audioBitrateKbps : int = 128
+  + toFFmpegArgs(input : MediaFile) : List<String>
+  + validate() : boolean
+}
+
+class CompressionJob {
+  - jobId : String
+  - status : JobStatus
+  - progress : float
+  + start() : void
+  + cancel() : void
+  + onProgress(handler : Callback) : void
+}
+
+class FFmpegEngine {
+  - loaded : boolean
+  + load() : Promise<void>
+  + run(args : List<String>) : Blob
+  + onProgress(cb : Callback) : void
+}
+
+class DownloadService {
+  + createObjectUrl(data : Blob) : String
+  + triggerDownload(url : String, filename : String) : void
+}
+
+enum JobStatus {
+  READY
+  ENCODING
+  DONE
+  FAILED
+}
+
+MediaFile <|-- VideoFile
+MediaFile <|-- ImageFile
+MediaFile <|-- AudioFile
+
+CompressionJob "1" *-- "1" CompressionSettings : налаштування >
+CompressionJob "0..*" o-- "1" MediaFile : вхідний файл >
+FFmpegEngine "1" -- "0..*" CompressionJob : виконує <
+CompressionJob ..> DownloadService : використовує
+CompressionJob -> JobStatus
+@enduml

@@ -1,0 +1,55 @@
+@startuml
+skinparam shadowing false
+actor "Користувач" as U
+participant ":CompressorPage" as UI
+participant ":VideoFile" as VF
+participant ":CompressionJob" as Job
+participant ":FFmpegEngine" as Eng
+participant ":DownloadService" as DL
+
+U -> UI : dropFile(file)
+activate UI
+UI -> VF : validate()
+activate VF
+VF --> UI : result : ValidationResult
+deactivate VF
+
+alt файл невалідний (формат / розмір > 2 ГБ)
+  UI --> U : повідомлення про помилку
+else файл валідний
+  UI --> U : метадані файлу та налаштування
+  U -> UI : setCrf(26), setPreset("slow")
+  U -> UI : натиснути "Compress"
+  UI -> Job : start()
+  activate Job
+
+  opt WASM-модуль ще не завантажений
+    Job -> Eng : load()
+    activate Eng
+    Eng --> Job : ready
+    deactivate Eng
+  end
+
+  Job -> Eng : run(settings.toFFmpegArgs(file))
+  activate Eng
+
+  loop кожна progress-подія кодування
+    Eng --> Job : progress(p)
+    Job --> UI : updateProgress(p)
+    UI --> U : прогрес-бар (p%)
+  end
+
+  Eng --> Job : output : Blob
+  deactivate Eng
+
+  Job -> DL : createObjectUrl(output)
+  activate DL
+  DL --> Job : url
+  Job -> DL : triggerDownload(url, "video_compressed.mp4")
+  DL --> U : файл збережено на пристрій
+  deactivate DL
+  Job --> UI : status = DONE
+  deactivate Job
+end
+deactivate UI
+@enduml

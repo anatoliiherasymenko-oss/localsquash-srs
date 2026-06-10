@@ -1,0 +1,36 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam actorStyle stickman
+
+actor "Користувач" as User
+actor "Адміністратор" as Admin
+actor "Платіжний сервіс\n(Buy Me a Coffee)" as Pay <<external system>>
+
+rectangle "LocalSquash — браузерний компресор медіафайлів" {
+  usecase "UC-01\nСтиснути відео\n(CRF, пресет)" as UC01
+  usecase "UC-02\nСтиснути зображення" as UC02
+  usecase "UC-03\nСтиснути аудіо" as UC03
+  usecase "UC-04\nКонвертувати відео у MP4" as UC04
+  usecase "UC-05\nВідкрити та валідувати\nлокальний файл" as UC05
+  usecase "UC-06\nЗавантажити результат" as UC06
+  usecase "UC-07\nОбрізати / кадрувати відео" as UC07
+  usecase "UC-08\nЗробити донат" as UC08
+  usecase "UC-09\nОпублікувати матеріал блогу" as UC09
+}
+
+User --> UC01
+User --> UC02
+User --> UC03
+User --> UC04
+User --> UC08
+Admin --> UC09
+UC08 --> Pay
+
+UC01 ..> UC05 : <<include>>
+UC02 ..> UC05 : <<include>>
+UC03 ..> UC05 : <<include>>
+UC04 ..> UC05 : <<include>>
+UC01 ..> UC06 : <<include>>
+UC07 ..> UC01 : <<extend>>
+@enduml
