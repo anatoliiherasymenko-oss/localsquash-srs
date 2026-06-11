@@ -1,0 +1,19 @@
+{
+  "name": "localsquash-api",
+  "version": "1.0.0",
+  "description": "REST API-обгортка модуля побудови команди FFmpeg (самостійна робота з ОПІ, варіант 2)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest --verbose"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  },
+  "license": "MIT"
+}
