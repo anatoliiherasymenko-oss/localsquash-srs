@@ -1,0 +1,30 @@
+# Бонус: CI/CD — тести перед розгортанням, потім Deploy Hook на Render
+name: CI/CD Deploy
+
+on:
+  push:
+    branches: [main]
+    paths: ['api/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy Hook
+        run: curl -fsS "${{ secrets.RENDER_DEPLOY_HOOK }}"
